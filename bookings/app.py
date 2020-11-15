@@ -12,11 +12,11 @@ from flask import current_app
 
 from connexion import NoContent, request
 
-from orm import db, Booking
+from BookingService.bookings.orm import db, Booking
 
-from utils import add_booking, get_a_table, update_booking, put_fake_data
+from BookingService.bookings.utils import add_booking, get_a_table, update_booking, put_fake_data
 
-from errors import Error, Error400, Error404, Error500
+from BookingService.bookings.errors import Error, Error400, Error404, Error500
 
 """
 The default app configuration: 
@@ -243,7 +243,7 @@ def setup(application, config):
     if config["REMOVE_DB"]:
         logging.info("- GoOutSafe:Bookings Removing Database...")
         try:
-            os.remove(config["SQLALCHEMY_DATABASE_URI"])
+            os.remove("bookings/"+config["SQLALCHEMY_DATABASE_URI"])
             logging.info("- GoOutSafe:Bookings Database Removed")
         except:
             pass

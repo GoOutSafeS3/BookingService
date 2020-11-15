@@ -5,7 +5,7 @@ import os
 
 from flask import current_app
 
-from orm import db, Booking
+from BookingService.bookings.orm import db, Booking
 
 def use_mocks():
     with current_app.app_context():

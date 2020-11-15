@@ -121,7 +121,7 @@ paths:
         schema:
           type: integer
       - in: query
-        name: entrancey
+        name: entrance
         schema:
           type: boolean
       requestBody:
