@@ -1,0 +1,314 @@
+openapi: 3.0.1
+info:
+  title: Bookings microservice REST API
+  description: Bookings from GoOutSafe with Microservices
+  version: "0.1"
+servers:
+- url: /
+paths:
+  /bookings: ################################# /BOOKINGS #######################################
+    get: ########################## GET ALL BOOKINGS
+      tags:
+      - Bookings
+      summary: Get all bookings
+      operationId: app.get_bookings
+      parameters:
+        - in: query
+          name: user
+          schema:
+            type: integer
+          description: The User Unique Identifier
+        - in: query
+          name: rest
+          schema:
+            type: integer
+          description: The Restaurant Unique Identifier
+        - in: query
+          name: table
+          schema:
+            type: integer
+          description: The Table Unique Identifier
+        - in: query
+          name: begin
+          schema:
+            type: string
+            format: date-time
+          description: The beginning of the research period
+        - in: query
+          name: end
+          schema:
+            type: string
+            format: date-time
+          description: The end of the research period
+      responses:
+        200:
+          description: Return all bookings
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Booking'
+        400:
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          
+    post: ########################## CREATE A NEW BOOKING
+      tags:
+      - Bookings
+      summary: Creates a new booking
+      operationId: app.new_booking
+      requestBody:
+        required: true
+        content:
+          application/json:
+              schema:
+                $ref: '#/components/schemas/NewBooking'
+      responses:
+        201:
+          description: Booking created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Booking'
+        400:
+          description: Impossible to create the requested booking
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /bookings/{booking_id}: ################################# /BOOKINGS/ID #######################################
+    get: ########################## GET A BOOKING
+      tags:
+      - Bookings
+      summary: Get a single booking
+      operationId: app.get_booking
+      parameters:
+      - name: booking_id
+        in: path
+        description: Booking's Unique Identifier
+        required: true
+        schema:
+          type: integer
+      responses:
+        200:
+          description: Return booking
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Booking'
+        404:
+          description: Booking not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          
+    put: ########################## EDIT A BOOKING
+      tags:
+      - Bookings
+      summary: Edit a booking
+      operationId: app.put_booking
+      parameters:
+      - name: booking_id
+        in: path
+        description: Booking's Unique Identifier
+        required: true
+        schema:
+          type: integer
+      - in: query
+        name: entrancey
+        schema:
+          type: boolean
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EditBooking'
+      responses:
+        200:
+          description: Booking edited successfully
+          
+        400:
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          
+        409:
+          description: Impossible to edit the requested booking
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          
+        404:
+          description: Booking not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          
+    delete: ########################## DELETE A BOOKING
+      tags:
+      - Bookings
+      summary: Delete a booking
+      operationId: app.delete_booking
+      parameters:
+      - name: booking_id
+        in: path
+        description: Booking's Unique Identifier
+        required: true
+        schema:
+          type: integer
+      responses:
+        204:
+          description: Booking deleted successfully
+          
+        403:
+          description: Impossible to delete the booking
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          
+        404:
+          description: Booking not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          
+  /users/{user_id}/contacts:
+    get: ########################## GET A USER CONTACTS
+      tags:
+      - Users
+      summary: Get a user's contacts
+      operationId: app.get_contacts
+      parameters:
+      - name: user_id
+        in: path
+        description: User's Unique Identifier
+        required: true
+        schema:
+          type: integer
+      responses:
+        200:
+          description: Return user's contacts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+        404:
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          
+components:
+  schemas:
+
+    EditBooking:
+      type: object
+      properties:
+        number_of_people:
+          type: integer
+          description: The booking's number of people 
+          minimum: 1
+          example: 4
+        booking_datetime:
+          type: string
+          format: date-time
+          description: For when is the booking
+          example: "2020-11-10T10:30:00+1:00"
+        
+    NewBooking:
+      type: object
+      allOf:     # Combines the BasicErrorModel and the inline model
+        - $ref: '#/components/schemas/EditBooking'
+        - type: object
+          required:
+            - number_of_people
+            - booking_datetime
+      properties:
+        user_id:
+          type: integer
+          description: The Unique Identifier of the user who made the booking
+          example: 123
+        restaurant_id:
+          type: integer
+          description: The Unique Identifier of the restaurant
+          example: 21
+      required:
+        - user_id
+        - restaurant_id
+        
+    Booking:
+      type: object
+      allOf:     # Combines the BasicErrorModel and the inline model
+        - $ref: '#/components/schemas/NewBooking'
+        - type: object
+      properties:
+        url:
+          type: string
+          description: Booking location
+          readOnly: true
+          example: /bookings/42
+        datetime:
+          type: string
+          format: date-time
+          readOnly: true
+          description: When the booking was created
+          example: "2020-11-10T10:30:00+1:00"
+        id:
+          type: integer
+          description: Booking Unique Identifier
+          readOnly: true
+          example: 42
+        table_id:
+          type: integer
+          description: The Unique Identifier of the table reserved
+          readOnly: true
+          example: 11
+        entrance_datetime:
+          type: string
+          format: date-time
+          description: When the user actually entered the restaurant
+          example: "2020-11-10T10:30:00+1:00"
+
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: The Unique Identifier of a user
+          example: 42
+
+    Error:
+      type: object
+      properties:
+        type:
+          type: string
+          description: Error type
+          example: about:blank
+        title:
+          type: string
+          description: Error name
+          example: Bad Request
+        status:
+          type: integer
+          description: Error status code
+          example: about:blank
+        detail:
+          type: string
+          description: Error description
+          example: None is not of type 'string'
