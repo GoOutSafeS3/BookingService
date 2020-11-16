@@ -1,5 +1,5 @@
 connexion
 Flask
 flask-sqlalchemy
-unittest
+python-dateutil
 requests
