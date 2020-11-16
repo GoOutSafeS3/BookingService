@@ -1,10 +1,12 @@
 FROM python:3.7-alpine3.11
-COPY requirements.txt .
+
+WORKDIR /usr/src/app
+
+COPY . ./
 RUN pip install -r requirements.txt
-RUN pip install pytest pytest-cov
-ADD . /code
-WORKDIR /code/bookings
 
-ENV PYTHONPATH=./bookings
+COPY . .
 
-CMD ["python", "./app.py"]
+ENV PYTHONPATH=.
+
+CMD ["python", "bookings/app.py"]

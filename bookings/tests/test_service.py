@@ -7,6 +7,7 @@ from requests.models import Response
 
 from bookings.app import create_app 
 
+
 class BookingsTests(unittest.TestCase): 
     """ Tests endpoints with mocks """
 
