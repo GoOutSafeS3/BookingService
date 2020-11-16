@@ -126,6 +126,10 @@ def put_booking(booking_id, entrance=False):
         else:
             return Error500().get()
 
+    now = datetime.datetime.now()
+    if q["booking_datetime"] < now:
+        return Error400("booking","You cannot change a past booking").get()
+
     req = request.json
 
     if "booking_datetime" in req:
@@ -184,9 +188,6 @@ def delete_booking(booking_id):
     except Exception as e:
         logging.info("- GoOutSafe:Bookings IMPOSSIBLE TO DELETE %s -> %s",str(p["id"]),e)
         return Error500().get()
-
-def get_contacts(user_id): #TODO
-    return Error404("user_id","User not found").get()
 
 def get_config(configuration=None):
     """

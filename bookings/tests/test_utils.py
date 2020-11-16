@@ -1,8 +1,8 @@
-"""
+from datetime import date
 import unittest 
 import datetime
 
-from bookings.utils import get_restaurant, get_tables, restaurant_is_open, get_a_table
+from bookings.utils import get_restaurant, get_tables, restaurant_is_open, get_a_table, update_booking
 
 from bookings.app import create_app 
 
@@ -193,4 +193,7 @@ class BookingsFailureTests(unittest.TestCase):
             for i in [1,2,3,4]:
                 r = get_a_table(i, 1, booking)
                 self.assertEqual(r, None, msg=i)
-"""
+
+    def test_update_booking_wrong_id(self):
+        with self.app.app_context():
+            self.assertEqual(None,update_booking(999, 2, datetime.datetime.now(), 1))

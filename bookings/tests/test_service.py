@@ -1,5 +1,7 @@
+from datetime import date
 import unittest 
 import datetime
+import dateutil
 
 from requests.models import Response
 
@@ -25,14 +27,183 @@ class BookingsTests(unittest.TestCase):
 #### tests #### 
 ############### 
 
-    def test_new_booking(self):
-        client = self.app.test_client() 
+    def test_edit_booking_400(self):
+        client = self.app.test_client()
+
         booking = {}
+        response = client.put('/bookings/1',json=booking)
+        json = response.get_json()
+        self.assertEqual(response.status_code, 400, msg=json)
+
+        booking = {
+            "number_of_people":1, 
+            "booking_datetime":"worngdatetime"
+            }
+        response = client.put('/bookings/1',json=booking)
+        json = response.get_json()
+        self.assertEqual(response.status_code, 400, msg=json) 
+
+        booking = {
+            "number_of_people":1, 
+            "booking_datetime": (datetime.datetime.now() - datetime.timedelta(days=1)).isoformat()
+            }
+        response = client.put('/bookings/1',json=booking)
+        json = response.get_json()
+        self.assertEqual(response.status_code, 400, msg=json) 
+
+        booking = {
+            "number_of_people":0, 
+            "booking_datetime": (datetime.datetime.now() + datetime.timedelta(days=1)).isoformat()
+            }
+        response = client.put('/bookings/1',json=booking)
+        json = response.get_json()
+        self.assertEqual(response.status_code, 400, msg=json)
+
+        booking = {
+            "number_of_people":1, 
+            "booking_datetime": (datetime.datetime.now().replace(hour=13,minute=30,second=0,microsecond=0) + datetime.timedelta(days=1)).isoformat()
+            }
+        response = client.put('/bookings/1',json=booking)
+        json = response.get_json()
+        self.assertEqual(response.status_code, 400, msg=json)
+
+        booking = {
+            "number_of_people":1, 
+            "booking_datetime": (datetime.datetime.now() + datetime.timedelta(days=1)).isoformat()
+            }
+        response = client.put('/bookings/6',json=booking)
+        json = response.get_json()
+        self.assertEqual(response.status_code, 400, msg=json)
+
+
+    def test_edit_booking(self):
+        client = self.app.test_client()
+
+        now = datetime.datetime.now()
+
+        response = client.get('/bookings?rest=3&begin='+now.isoformat()+"Z")
+        json = response.get_json()
+        self.assertEqual(response.status_code, 200, msg=json)
+        self.assertEqual(len(json), 2, msg=json)
+
+        booking = {
+            "number_of_people":2
+            }
+        response = client.put('/bookings/2',json=booking)
+        json = response.get_json()
+        self.assertEqual(response.status_code, 200, msg=json)
+        response = client.get('/bookings?rest=3&begin='+now.isoformat()+"Z")
+        json = response.get_json()
+        self.assertEqual(response.status_code, 200, msg=json)
+        self.assertEqual(len(json), 2, msg=json)
+        self.assertEqual(json[0]["id"], 2, msg=json)
+        self.assertEqual(json[0]["number_of_people"], 2, msg=json)
+
+        booking = {
+            "booking_datetime": (now + datetime.timedelta(hours=3)).isoformat()+"Z"
+            }
+        response = client.put('/bookings/2',json=booking)
+        json = response.get_json()
+        self.assertEqual(response.status_code, 200, msg=json)
+        response = client.get('/bookings?rest=3&begin='+now.isoformat()+"Z")
+        json = response.get_json()
+        self.assertEqual(response.status_code, 200, msg=json)
+        self.assertEqual(len(json), 2, msg=json)
+        self.assertEqual(json[0]["id"], 2, msg=json)
+        self.assertEqual(json[0]["booking_datetime"], (now + datetime.timedelta(hours=3)).isoformat()+"Z", msg=json)
+
+        booking = {
+            "number_of_people":3,
+            "booking_datetime": (now + datetime.timedelta(hours=2)).isoformat()+"Z"
+            }
+        response = client.put('/bookings/2',json=booking)
+        json = response.get_json()
+        self.assertEqual(response.status_code, 200, msg=json)
+        response = client.get('/bookings?rest=3&begin='+now.isoformat()+"Z")
+        json = response.get_json()
+        self.assertEqual(response.status_code, 200, msg=json)
+        self.assertEqual(len(json), 2, msg=json)
+        self.assertEqual(json[0]["id"], 2, msg=json)
+        self.assertEqual(json[0]["number_of_people"], 3, msg=json)
+        self.assertEqual(json[0]["booking_datetime"], (now + datetime.timedelta(hours=2)).isoformat()+"Z", msg=json)
+   
+    def test_new_booking_400(self):
+        client = self.app.test_client()
+
+        booking = {}
+        response = client.post('/bookings',json=booking)
+        json = response.get_json()
+        self.assertEqual(response.status_code, 400, msg=json)
+
+        booking = {
+            "user_id":1,
+            "restaurant_id":3,
+            "number_of_people":1, 
+            "booking_datetime":"worngdatetime"
+            }
         response = client.post('/bookings',json=booking)
         json = response.get_json()
         self.assertEqual(response.status_code, 400, msg=json) 
 
-"""
+        booking = {
+            "user_id":1,
+            "restaurant_id":3,
+            "number_of_people":1, 
+            "booking_datetime": (datetime.datetime.now() - datetime.timedelta(days=1)).isoformat()
+            }
+        response = client.post('/bookings',json=booking)
+        json = response.get_json()
+        self.assertEqual(response.status_code, 400, msg=json) 
+
+        booking = {
+            "user_id":1,
+            "restaurant_id":3,
+            "number_of_people":0, 
+            "booking_datetime": (datetime.datetime.now() + datetime.timedelta(days=1)).isoformat()
+            }
+        response = client.post('/bookings',json=booking)
+        json = response.get_json()
+        self.assertEqual(response.status_code, 400, msg=json) 
+
+    def test_new_booking(self):
+        client = self.app.test_client()
+
+        booking = {
+            "user_id":1,
+            "restaurant_id":3,
+            "number_of_people":3, 
+            "booking_datetime": (datetime.datetime.now() + datetime.timedelta(days=1)).isoformat()
+            }
+        response = client.post('/bookings',json=booking)
+        json = response.get_json()
+        self.assertEqual(response.status_code, 200, msg=json)
+        self.assertEqual(json["table_id"], 5, msg=json)
+
+        response = client.post('/bookings',json=booking)
+        json = response.get_json()
+        self.assertEqual(response.status_code, 400, msg=json)
+
+        booking = {
+            "user_id":1,
+            "restaurant_id":3,
+            "number_of_people":2, 
+            "booking_datetime": (datetime.datetime.now() + datetime.timedelta(days=1)).isoformat()
+            }
+        response = client.post('/bookings',json=booking)
+        json = response.get_json()
+        self.assertEqual(response.status_code, 200, msg=json)
+        self.assertEqual(json["table_id"], 6, msg=json)
+
+        booking = {
+            "user_id":1,
+            "restaurant_id":3,
+            "number_of_people":1, 
+            "booking_datetime": (datetime.datetime.now() + datetime.timedelta(days=1)).isoformat()
+            }
+        response = client.post('/bookings',json=booking)
+        json = response.get_json()
+        self.assertEqual(response.status_code, 400, msg=json)
+
     def test_404(self): 
         client = self.app.test_client() 
         endpoints = { 
@@ -48,8 +219,6 @@ class BookingsTests(unittest.TestCase):
                 elif m == "delete": 
                     response = client.delete(k+'999') 
                 self.assertEqual(response.status_code, 404, msg="ENDPOINT: "+k+"\nMETHOD: "+m+"\n"+response.get_data(as_text=True)) 
-
- 
 
     def test_get_bookings(self): 
         client = self.app.test_client() 
@@ -211,4 +380,3 @@ class BookingsTests(unittest.TestCase):
         response = client.put('/bookings/1?entrance=true',json={}) 
         json = response.get_json() 
         self.assertEqual(response.status_code, 400, msg=json)
-"""

@@ -17,7 +17,7 @@ class Error:
 class Error400(Error):
     
     def __init__(self, type, detail):
-        self.type = "badrequest:"+type
+        self.type = "about:blank"
         self.title = "Bad Request"
         self.status = 400
         self.detail = detail
@@ -25,7 +25,7 @@ class Error400(Error):
 class Error404(Error):
     
     def __init__(self, type, detail):
-        self.type = "notfound:"+type
+        self.type = "about:blank"
         self.title = "Not Found"
         self.status = 404
         self.detail = detail
@@ -33,7 +33,7 @@ class Error404(Error):
 class Error500(Error):
     
     def __init__(self):
-        self.type = "tryagain"
+        self.type = "about:blank"
         self.title = "Try Again"
         self.status = 500
         self.detail = "An error occured, please try again"
