@@ -12,11 +12,11 @@ from flask import current_app
 
 from connexion import NoContent, request
 
-from BookingService.bookings.orm import db, Booking
+from bookings.orm import db, Booking
 
-from BookingService.bookings.utils import add_booking, get_a_table, update_booking, put_fake_data
+from bookings.utils import add_booking, get_a_table, update_booking, put_fake_data
 
-from BookingService.bookings.errors import Error, Error400, Error404, Error500
+from bookings.errors import Error, Error400, Error404, Error500
 
 """
 The default app configuration: 

@@ -5,7 +5,7 @@ import os
 
 from flask import current_app
 
-from BookingService.bookings.orm import db, Booking
+from bookings.orm import db, Booking
 
 def use_mocks():
     with current_app.app_context():
@@ -75,9 +75,58 @@ def restaurant_is_open(restaurant_id, booking_datetime):
 
 
 def put_fake_data():
-    add_booking(1, 1, 1, (datetime.datetime.now() + datetime.timedelta(days=2)), 1) 
-    add_booking(1, 2, 1, (datetime.datetime.now() + datetime.timedelta(days=1)), 4)
-    add_booking(2, 2, 2, (datetime.datetime.now()), 2)
-    add_booking(3, 3, 3, (datetime.datetime.now() - datetime.timedelta(days=1)), 3)
-    add_booking(4, 2, 1, (datetime.datetime.now() - datetime.timedelta(days=2)), 5)
-    add_booking(4, 2, 1, (datetime.datetime.now() - datetime.timedelta(days=2)), 4)
+    """
+        USERS:
+            - 1: NO BOOKINGS 
+            - 2: 2 OLD BOOKINGS 
+            - 3: 1 NEW AND 1 OLD 
+            - 4: 2 NEW 
+        
+        RESTAURANTS:
+            - 1: NO BOOKINGS 
+            - 2: 2 OLD BOOKINGS 
+            - 3: 2 NEW AND 1 OLD 
+            - 4: 1 NEW 
+
+        TABLES:
+            - 1: NO BOOKINGS 
+                - CAPACITY: 4
+                - REST: 1
+                - BOOKINGS: []
+            - 2: 2 OLD BOOKINGS 
+                - CAPACITY: 3
+                - REST: 2
+                - BOOKINGS: [3, 4]
+            - 3: TABLE WITH A NEW BOOKING 
+                - CAPACITY: 2
+                - REST: 4
+                - BOOKINGS: [1]
+            - 4: TABLE WITH A OLD AND A NEW BOOKING
+                - CAPACITY: 5
+                - REST: 3
+                - BOOKINGS: [2, 6]
+            - 5: TABLE WITH A NEW BOOKING
+                - CAPACITY: 4
+                - REST: 3
+                - BOOKINGS: [5]
+    """
+
+    # (user_id, rest_id, number_of_people, booking_datetime, table_id)
+    
+    # 1: FUTURE BOOKING (USER 3, REST 4, TABLE 3)
+    add_booking(3, 4, 2, (datetime.datetime.now() + datetime.timedelta(days=2)), 3) 
+    
+    # 2: FUTURE BOOKING (USER 4, REST 3, TABLE 4)
+    add_booking(4, 3, 1, (datetime.datetime.now() + datetime.timedelta(days=1)), 4)
+    
+    # 3: OLD BOOKING (USER 2, REST 2, TABLE 2)
+    add_booking(2, 2, 3, (datetime.datetime.now()), 2)
+    
+    # 4: OLD BOOKING (USER 2, REST 2, TABLE 2)
+    add_booking(2, 2, 3, (datetime.datetime.now() - datetime.timedelta(days=1)), 2)
+    
+    # 5: FUTURE BOOKING (USER 4, REST 3, TABLE 5)
+    add_booking(4, 3, 1, (datetime.datetime.now() + datetime.timedelta(days=2)), 5)
+    
+    # 6: OLD BOOKING (USER 3, REST 3, TABLE 4)
+    add_booking(3, 3, 1, (datetime.datetime.now() - datetime.timedelta(days=2)), 4)
