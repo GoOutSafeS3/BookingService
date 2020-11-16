@@ -1,6 +1,8 @@
 import unittest 
 import datetime
 
+from requests.models import Response
+
 from bookings.app import create_app 
 
 class BookingsTests(unittest.TestCase): 
@@ -23,6 +25,14 @@ class BookingsTests(unittest.TestCase):
 #### tests #### 
 ############### 
 
+    def test_new_booking(self):
+        client = self.app.test_client() 
+        booking = {}
+        response = client.post('/bookings',json=booking)
+        json = response.get_json()
+        self.assertEqual(response.status_code, 400, msg=json) 
+
+"""
     def test_404(self): 
         client = self.app.test_client() 
         endpoints = { 
@@ -200,4 +210,5 @@ class BookingsTests(unittest.TestCase):
 
         response = client.put('/bookings/1?entrance=true',json={}) 
         json = response.get_json() 
-        self.assertEqual(response.status_code, 400, msg=json) 
+        self.assertEqual(response.status_code, 400, msg=json)
+"""

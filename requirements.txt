@@ -2,3 +2,4 @@ connexion
 Flask
 flask-sqlalchemy
 unittest
+requests

@@ -2,14 +2,127 @@ import datetime
 import logging
 import random
 import os
+import requests
 
 from flask import current_app
 
 from bookings.orm import db, Booking
 
-def use_mocks():
+restaurants = [
+    {
+        "url": "/restaurants/1", # NO OPENING TIMES
+        "id": 1,
+        "name": "Rest 1",
+        "rating_val": 3.4,
+        "rating_num": 123,
+        "lat": 42.42,
+        "lon": 42.42,
+        "phone": "050123456",
+        "first_opening_hour": 0,
+        "first_closing_hour": 0,
+        "second_opening_hour": None,
+        "second_closing_hour": None,
+        "occupation_time": 0,
+        "cuisine_type": "cuisine_type",
+        "menu": "menu",
+        "closed_days": [1,2,3,4,5,6,7]
+    },
+    {
+        "url": "/restaurants/2", # ONLY AT LUNCH (CLOSED ON MONDAYS)
+        "id": 2,
+        "name": "Rest 2",
+        "rating_val": 3.4,
+        "rating_num": 123,
+        "lat": 42.42,
+        "lon": 42.42,
+        "phone": "050123456",
+        "first_opening_hour": 10,
+        "first_closing_hour": 14,
+        "second_opening_hour": None,
+        "second_closing_hour": None,
+        "occupation_time": 1,
+        "cuisine_type": "cuisine_type",
+        "menu": "menu",
+        "closed_days": [1]
+    },
+    {
+        "url": "/restaurants/3", # ALWAYS OPEN (NEVER CLOSED)
+        "id": 3,
+        "name": "Rest 3",
+        "rating_val": 3.4,
+        "rating_num": 123,
+        "lat": 42.42,
+        "lon": 42.42,
+        "phone": "050123456",
+        "first_opening_hour": 0,
+        "first_closing_hour": 23,
+        "second_opening_hour": 0,
+        "second_closing_hour": 0,
+        "occupation_time": 2,
+        "cuisine_type": "cuisine_type",
+        "menu": "menu",
+        "closed_days": []
+    },
+    {
+        "url": "/restaurants/4", # TWO OPENINGS (CLOSED ON SUNDAY AND MONDAYS)
+        "id": 4,
+        "name": "Rest 4",
+        "rating_val": 3.4,
+        "rating_num": 123,
+        "lat": 42.42,
+        "lon": 42.42,
+        "phone": "050123456",
+        "first_opening_hour": 10,
+        "first_closing_hour": 12,
+        "second_opening_hour": 20,
+        "second_closing_hour": 23,
+        "occupation_time": 2,
+        "cuisine_type": "cuisine_type",
+        "menu": "menu",
+        "closed_days": [1, 7]
+    }
+]
+
+tables = [
+    [{"id":1, "capacity":4}],
+    [{"id":2, "capacity":3}],
+    [{"id":4, "capacity":5}, {"id":5, "capacity":4}, {"id":6, "capacity":2}],
+    [{"id":3, "capacity":2}]
+]
+
+def get_from(url):
+    try:
+        with current_app.app_context():
+            r = requests.get(url, timeout=current_app.config["TIMEOUT"])
+            if r.status_code == 200:
+                return r.json()
+            return None
+    except:
+        return None
+
+def get_restaurant(id):
+    """ Get the restaurant json or None """
     with current_app.app_context():
-        return current_app.config["USE_MOCKS"]
+        if current_app.config["USE_MOCKS"]:
+            id -= 1
+            if 0 <= id < len(restaurants):
+                return restaurants[id]
+            else:
+                return None
+        else:
+            return get_from(current_app.config["REST_SERVICE_URL"]+"/restaurants/"+str(id))
+
+def get_tables(id):
+    """ Get the list fo the restaurant's tables or None """
+    with current_app.app_context():
+        if current_app.config["USE_MOCKS"]:
+            id -= 1
+            if 0 <= id < len(restaurants):
+                return tables[id]
+            else:
+                return None
+        else:
+            return get_from(current_app.config["REST_SERVICE_URL"]+"/restaurants/"+str(id)+"/tables")
 
 def add_booking(user_id, rest_id, number_of_people, booking_datetime, table_id, entrance_datetime=None):
     try:
@@ -47,35 +160,102 @@ def update_booking(booking_id, number_of_people, booking_datetime, table_id, ent
         return None
 
 def get_a_table(restaurant_id, number_of_people, booking_datetime):
+    """ 
+    Return a free table if it is available, otherwise return -1. 
+    Return None if it is impossible to connect with the restaurant microservice.
+    """
 
-    if use_mocks():
-        is_open = restaurant_is_open(restaurant_id,booking_datetime)
-        if is_open is None:
-            return None
-        if not is_open:
-            return -1
-
-        x = random.randint(0,2)
-        if x == 0:
-            return None
-        return x
-    else:
+    is_open, rest = restaurant_is_open(restaurant_id, booking_datetime)
+    if is_open is None:
         return None
+    if not is_open:
+        return -1
+
+    tables = get_tables(restaurant_id)
+
+    if tables is None:
+        return None
+    if tables == []:
+        return -1
+
+    delta = int(rest["occupation_time"])
+    starting_period = booking_datetime - datetime.timedelta(hours=delta)
+    ending_period = booking_datetime + datetime.timedelta(hours=delta)
+
+    occupied = db.session.query(Booking.table_id).select_from(Booking)\
+        .filter(Booking.restaurant_id == restaurant_id)\
+        .filter(starting_period < Booking.booking_datetime)\
+        .filter(Booking.booking_datetime < ending_period )\
+        .all()
+
+    free_tables = [t for t in tables if ( ((t["id"],) not in occupied) and (t["capacity"] >= number_of_people) )] # returns the free table usable by this number of people
+    free_tables.sort(key=lambda x:x["capacity"]) # order the tables from the smaller
+
+    print()
+    print(tables)
+    print(occupied)
+    print(free_tables)
+
+    if free_tables == []:
+        return -1
+    return free_tables[0]["id"] # return the smaller table that can be used
 
 def restaurant_is_open(restaurant_id, booking_datetime):
-    if use_mocks():
-        x = random.randint(0,3)
-        if x == 0:
-            return None
-        elif x == 1:
-            return True
-        return False
-    else:   
-        return None
+    rest = get_restaurant(restaurant_id)
+    if rest is None:
+        return (None,None)
+    else:
+        if (booking_datetime.weekday()+1) in rest["closed_days"]:
+            return (False,rest)
+        
+        now = datetime.datetime.now()
+
+        booking = now.replace( hour=booking_datetime.hour, minute=booking_datetime.minute, second=0, microsecond=0 )
+
+        if rest["first_opening_hour"] is not None and rest["first_closing_hour"] is not None:
+            opening = now.replace( hour=rest["first_opening_hour"], minute=0, second=0, microsecond=0 )
+            closing = now.replace( hour=rest["first_closing_hour"], minute=0, second=0, microsecond=0 )
+
+            if opening <= booking <= closing:
+                return (True,rest)
+
+        if rest["second_opening_hour"] is not None and rest["second_closing_hour"] is not None:
+            opening = now.replace( hour=rest["second_opening_hour"], minute=0, second=0, microsecond=0 )
+            closing = now.replace( hour=rest["second_closing_hour"], minute=0, second=0, microsecond=0 )
+
+            if opening <= booking <= closing:
+                return (True,rest)
+
+        return (False,rest)
 
 
 def put_fake_data():
     """
+        BOOKINGS:
+            - 1: FUTURE BOOKING 
+                - USER 3 
+                - REST 4 
+                - TABLE 3
+            - 2: FUTURE BOOKING 
+                - USER 4
+                - REST 3
+                - TABLE 4
+            - 3: OLD BOOKING 
+                - USER 2
+                - REST 2
+                - TABLE 2
+            - 4: OLD BOOKING 
+                - USER 2
+                - REST 2
+                - TABLE 2
+            - 5: FUTURE BOOKING 
+                - USER 4
+                - REST 3
+                - TABLE 5
+            - 6: OLD BOOKING 
+                - USER 3
+                - REST 3
+                - TABLE 4
         USERS:
             - 1: NO BOOKINGS 
             - 2: 2 OLD BOOKINGS 
@@ -109,9 +289,13 @@ def put_fake_data():
                 - CAPACITY: 4
                 - REST: 3
                 - BOOKINGS: [5]
+            - 6: NO BOOKINGS
+                - CAPACITY: 2
+                - REST: 3
+                - BOOKINGS: []
     """
 
-    # (user_id, rest_id, number_of_people, booking_datetime, table_id)
+    # add_booking(user_id, rest_id, number_of_people, booking_datetime, table_id)
     
     # 1: FUTURE BOOKING (USER 3, REST 4, TABLE 3)
     add_booking(3, 4, 2, (datetime.datetime.now() + datetime.timedelta(days=2)), 3) 
