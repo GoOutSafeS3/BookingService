@@ -2,8 +2,9 @@ from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
 
-
 class Booking(db.Model):
+    """ Stores the bookings """
+    
     __tablename__ = 'booking'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     user_id = db.Column(db.Integer)
@@ -15,6 +16,7 @@ class Booking(db.Model):
     table_id = db.Column(db.Integer)
 
     def dump(self):
+        """ Return a db record as a dict """
         d = dict([(k,v) for k,v in self.__dict__.items() if k[0] != '_'])
         d["url"] = "/bookings/"+str(d["id"])
         return d

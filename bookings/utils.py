@@ -8,6 +8,10 @@ from flask import current_app
 
 from bookings.orm import db, Booking
 
+""" The list of restaurants used when the mocks are required 
+    
+    They are identified starting from 1.
+"""
 restaurants = [
     {
         "url": "/restaurants/1", # NO OPENING TIMES
@@ -83,6 +87,10 @@ restaurants = [
     }
 ]
 
+""" The list of tables for each restaurant used when the mocks are required 
+    
+    They are identified starting from 1.
+"""
 tables = [
     [{"id":1, "capacity":4}],
     [{"id":2, "capacity":3}],
@@ -91,6 +99,12 @@ tables = [
 ]
 
 def get_from(url):
+    """ Makes a get request with a timeout.
+
+    Returns the json object if the code is 200, otherwise None
+
+    The timeout is set in config.ini or the default one is used (0.001)
+    """
     try:
         with current_app.app_context():
             r = requests.get(url, timeout=current_app.config["TIMEOUT"])
@@ -101,10 +115,13 @@ def get_from(url):
         return None
 
 def get_restaurant(id):
-    """ Get the restaurant json or None """
+    """ Get the restaurant json or None 
+    
+    Use the default ones if mocks are requested
+    """
     with current_app.app_context():
         if current_app.config["USE_MOCKS"]:
-            id -= 1
+            id -= 1 # restaurant IDs starting by 1
             if 0 <= id < len(restaurants):
                 return restaurants[id]
             else:
@@ -113,10 +130,13 @@ def get_restaurant(id):
             return get_from(current_app.config["REST_SERVICE_URL"]+"/restaurants/"+str(id))
 
 def get_tables(id):
-    """ Get the list fo the restaurant's tables or None """
+    """ Get the list fo the restaurant's tables or None 
+    
+    Use the default ones if mocks are requested
+    """
     with current_app.app_context():
         if current_app.config["USE_MOCKS"]:
-            id -= 1
+            id -= 1 # restaurant IDs starting by 1
             if 0 <= id < len(restaurants):
                 return tables[id]
             else:
@@ -125,6 +145,11 @@ def get_tables(id):
             return get_from(current_app.config["REST_SERVICE_URL"]+"/restaurants/"+str(id)+"/tables")
 
 def add_booking(user_id, rest_id, number_of_people, booking_datetime, table_id, entrance_datetime=None):
+    """ Add a new reservation 
+    
+    Return the booking id, otherwise
+    Return None if a db error occured
+    """
     try:
         booking = Booking()
         booking.restaurant_id = rest_id
@@ -142,8 +167,12 @@ def add_booking(user_id, rest_id, number_of_people, booking_datetime, table_id, 
         return None
 
 def update_booking(booking_id, number_of_people, booking_datetime, table_id, entrance_datetime=None):
+    """ Edit a reservation specified by the id 
+    
+    Return the booking id, otherwise
+    Return None if a db error occured
+    """
     try:
-
         booking = db.session.query(Booking).filter_by(id = booking_id).first()
         if booking is None:
             return None
@@ -153,7 +182,6 @@ def update_booking(booking_id, number_of_people, booking_datetime, table_id, ent
         booking.table_id = table_id
         db.session.add(booking)
         db.session.commit()
-
         return booking.id
     except:
         db.session.rollback()
@@ -162,18 +190,19 @@ def update_booking(booking_id, number_of_people, booking_datetime, table_id, ent
 def get_a_table(restaurant_id, number_of_people, booking_datetime):
     """ 
     Return a free table if it is available, otherwise return -1. 
+
     Return None if it is impossible to connect with the restaurant microservice.
     """
 
-    is_open, rest = restaurant_is_open(restaurant_id, booking_datetime)
-    if is_open is None:
+    is_open, rest = restaurant_is_open(restaurant_id, booking_datetime) # check is the restaurant is open on that date
+    if is_open is None: # connection error with the restaurant microservice
         return None
-    if not is_open:
+    if not is_open: 
         return -1
 
-    tables = get_tables(restaurant_id)
+    tables = get_tables(restaurant_id) # return the list of tables of the restaurant
 
-    if tables is None:
+    if tables is None: # connection error with the restaurant microservice
         return None
     if tables == []:
         return -1
@@ -182,6 +211,7 @@ def get_a_table(restaurant_id, number_of_people, booking_datetime):
     starting_period = booking_datetime - datetime.timedelta(hours=delta)
     ending_period = booking_datetime + datetime.timedelta(hours=delta)
 
+    # the list of the tables occupied or booked in the same period as the booking
     occupied = db.session.query(Booking.table_id).select_from(Booking)\
         .filter(Booking.restaurant_id == restaurant_id)\
         .filter(starting_period < Booking.booking_datetime)\
@@ -191,18 +221,19 @@ def get_a_table(restaurant_id, number_of_people, booking_datetime):
     free_tables = [t for t in tables if ( ((t["id"],) not in occupied) and (t["capacity"] >= number_of_people) )] # returns the free table usable by this number of people
     free_tables.sort(key=lambda x:x["capacity"]) # order the tables from the smaller
 
-    print()
-    print(tables)
-    print(occupied)
-    print(free_tables)
-
-    if free_tables == []:
+    if free_tables == []: # no free tables
         return -1
     return free_tables[0]["id"] # return the smaller table that can be used
 
 def restaurant_is_open(restaurant_id, booking_datetime):
+    """ Check if a restaurant is open in a given datetime
+
+    Return true if the restaurant is open (with the json of the restaurant)
+    Return false if the restaurant is closed (with the json of the restaurant)
+    eturn None if it is impossible to connect with the restaurant microservice.
+    """
     rest = get_restaurant(restaurant_id)
-    if rest is None:
+    if rest is None: # error with the microservice
         return (None,None)
     else:
         if (booking_datetime.weekday()+1) in rest["closed_days"]:
@@ -230,6 +261,12 @@ def restaurant_is_open(restaurant_id, booking_datetime):
 
 
 def put_fake_data():
+    """
+    Enter fake data (useful for testing purposes).
+
+    The properties of the "fake world" are described below
+    """
+
     """
         BOOKINGS:
             - 1: FUTURE BOOKING 

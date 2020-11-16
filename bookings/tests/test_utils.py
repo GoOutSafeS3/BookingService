@@ -8,7 +8,8 @@ from bookings.app import create_app
 
 from flask import current_app
 
-class BookingsFailureTests(unittest.TestCase): 
+class BookingsUtilsTests(unittest.TestCase):
+    """ Tests utility functions with and without mocks """
 
 ############################ 
 #### setup and teardown #### 

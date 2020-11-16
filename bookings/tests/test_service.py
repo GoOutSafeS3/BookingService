@@ -8,6 +8,7 @@ from requests.models import Response
 from bookings.app import create_app 
 
 class BookingsTests(unittest.TestCase): 
+    """ Tests endpoints with mocks """
 
     ############################ 
     #### setup and teardown #### 
@@ -27,7 +28,7 @@ class BookingsTests(unittest.TestCase):
 #### tests #### 
 ############### 
 
-    def test_edit_booking_400(self):
+    def test_edit_booking_400_409(self):
         client = self.app.test_client()
 
         booking = {}
@@ -65,7 +66,7 @@ class BookingsTests(unittest.TestCase):
             }
         response = client.put('/bookings/1',json=booking)
         json = response.get_json()
-        self.assertEqual(response.status_code, 400, msg=json)
+        self.assertEqual(response.status_code, 409, msg=json)
 
         booking = {
             "number_of_people":1, 
@@ -176,12 +177,12 @@ class BookingsTests(unittest.TestCase):
             }
         response = client.post('/bookings',json=booking)
         json = response.get_json()
-        self.assertEqual(response.status_code, 200, msg=json)
+        self.assertEqual(response.status_code, 201, msg=json)
         self.assertEqual(json["table_id"], 5, msg=json)
 
         response = client.post('/bookings',json=booking)
         json = response.get_json()
-        self.assertEqual(response.status_code, 400, msg=json)
+        self.assertEqual(response.status_code, 409, msg=json)
 
         booking = {
             "user_id":1,
@@ -191,7 +192,7 @@ class BookingsTests(unittest.TestCase):
             }
         response = client.post('/bookings',json=booking)
         json = response.get_json()
-        self.assertEqual(response.status_code, 200, msg=json)
+        self.assertEqual(response.status_code, 201, msg=json)
         self.assertEqual(json["table_id"], 6, msg=json)
 
         booking = {
@@ -202,7 +203,7 @@ class BookingsTests(unittest.TestCase):
             }
         response = client.post('/bookings',json=booking)
         json = response.get_json()
-        self.assertEqual(response.status_code, 400, msg=json)
+        self.assertEqual(response.status_code, 409, msg=json)
 
     def test_404(self): 
         client = self.app.test_client() 
@@ -379,4 +380,23 @@ class BookingsTests(unittest.TestCase):
 
         response = client.put('/bookings/1?entrance=true',json={}) 
         json = response.get_json() 
+        self.assertEqual(response.status_code, 400, msg=json)
+
+
+    def test_set_entrance_then_try_to_change(self): 
+
+        client = self.app.test_client() 
+
+        response = client.put('/bookings/2?entrance=true',json={}) 
+        json = response.get_json() 
+        self.assertEqual(response.status_code, 200, msg=json) 
+        self.assertEqual(json["id"], 2, msg=json) 
+        self.assertIsNotNone(json["entrance_datetime"], msg=json) 
+
+        
+        booking = {
+            "number_of_people":2
+            }
+        response = client.put('/bookings/2',json=booking)
+        json = response.get_json()
         self.assertEqual(response.status_code, 400, msg=json)

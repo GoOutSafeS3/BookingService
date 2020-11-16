@@ -4,6 +4,7 @@ import datetime
 from bookings.app import create_app 
 
 class BookingsFailureTests(unittest.TestCase): 
+    """ Tests endpoints without mocks """
 
     ############################ 
     #### setup and teardown #### 
