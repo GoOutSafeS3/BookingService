@@ -132,4 +132,4 @@ dmypy.json
 
 report.html
 assets/
-*.db
+**/*.db
