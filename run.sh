@@ -1,10 +1,10 @@
 #!/bin/sh
 
 case "$1" in
-    "unittest-report")
+    "unittests-report")
         pytest --cov=bookings --cov-report term-missing --cov-report html --html=report.html
         ;;
-    "unittest")
+    "unittests")
         pytest --cov=bookings
         ;;
     "setup")
