@@ -18,6 +18,9 @@ from bookings.utils import add_booking, get_a_table, update_booking, put_fake_da
 
 from bookings.errors import Error, Error400, Error404, Error500
 
+import sys
+sys.path.append("./bookings/")
+
 """
 The default app configuration: 
 in case a configuration is not found or 
