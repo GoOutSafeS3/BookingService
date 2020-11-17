@@ -1,9 +1,6 @@
 import unittest 
 import datetime
 
-import sys
-sys.path.append("..")
-
 from bookings.app import create_app 
 
 class BookingsFailureTests(unittest.TestCase): 

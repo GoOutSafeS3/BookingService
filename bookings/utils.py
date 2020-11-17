@@ -1,7 +1,4 @@
 import datetime
-import logging
-import random
-import os
 import requests
 
 from flask import current_app

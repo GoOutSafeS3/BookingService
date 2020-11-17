@@ -1,10 +1,7 @@
-from datetime import date, datetime
-
-import json
+from datetime import datetime
 
 import datetime
 import requests
-from requests import status_codes
 
 BOOKINGS_SERVICE = "http://localhost:8080/"
 TIMEOUT = 1
@@ -80,7 +77,7 @@ def get_bookings(user=None, rest=None, table=None, begin=None, end=None):
 
     if begin is not None:
         url += "begin="+str(begin)+"&"
-        
+
     if end is not None:
         url += "user="+str(end)+"&"
 
@@ -118,7 +115,7 @@ if __name__ == "__main__":
     print(get_bookings(rest=3),"\n")
     print(get_a_booking(1),"\n")
     print(get_a_booking(100),"\n")
-    print(new_booking(1,3,1,(datetime.datetime.now()+datetime.timedelta(hours=2)).isoformat()),"\n")
+    print(new_booking(1,3,1,(datetime.datetime.now()+datetime.timedelta(days=2)).isoformat()),"\n")
     print(edit_booking(1,1),"\n")
     print(edit_booking(7,1),"\n")
     print(edit_booking(7,1),"\n")
