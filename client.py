@@ -119,6 +119,7 @@ if __name__ == "__main__":
     print(edit_booking(1,1),"\n")
     print(edit_booking(7,1),"\n")
     print(edit_booking(7,1),"\n")
+    print(edit_booking(1),"\n")
     print(delete_booking(5),"\n")
     print(delete_booking(6),"\n")
     print(get_bookings(),"\n")

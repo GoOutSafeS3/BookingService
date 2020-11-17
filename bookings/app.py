@@ -212,7 +212,7 @@ def put_booking(booking_id, entrance=False):
 
     req = request.json
 
-    if "booking_datetime" in req:
+    if "booking_datetime" in req and req["booking_datetime"] is not None:
         try:
             req["booking_datetime"] = dateutil.parser.parse(req["booking_datetime"])
         except:
@@ -224,7 +224,7 @@ def put_booking(booking_id, entrance=False):
     else: # use the "old" datetime
         req["booking_datetime"] = q["booking_datetime"]
 
-    if "number_of_people" not in req:
+    if "number_of_people" not in req or req["number_of_people"] is None:
         req["number_of_people"] = q["number_of_people"]
 
     if (q["booking_datetime"] != req["booking_datetime"]) or (q["number_of_people"] != req["number_of_people"]):

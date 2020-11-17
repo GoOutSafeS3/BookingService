@@ -222,11 +222,13 @@ components:
         number_of_people:
           type: integer
           description: The booking's number of people 
+          nullable: true
           minimum: 1
           example: 4
         booking_datetime:
           type: string
           format: date-time
+          nullable: true
           description: For when is the booking
           example: "2020-11-10T10:30:00+1:00"
         
@@ -281,6 +283,7 @@ components:
         entrance_datetime:
           type: string
           format: date-time
+          nullable: true
           description: When the user actually entered the restaurant
           example: "2020-11-10T10:30:00+1:00"
 
