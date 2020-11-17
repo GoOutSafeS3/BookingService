@@ -189,7 +189,9 @@ def update_booking(booking_id, number_of_people, booking_datetime, table_id, ent
 
 def get_a_table(restaurant_id, number_of_people, booking_datetime):
     """ 
-    Return a free table if it is available, otherwise return -1. 
+    Return a free table if it is available, otherwise
+        - Return -1 if there are no free tables
+        - Return -2 if the restaurant is closed
 
     Return None if it is impossible to connect with the restaurant microservice.
     """
@@ -198,7 +200,7 @@ def get_a_table(restaurant_id, number_of_people, booking_datetime):
     if is_open is None: # connection error with the restaurant microservice
         return None
     if not is_open: 
-        return -1
+        return -2
 
     tables = get_tables(restaurant_id) # return the list of tables of the restaurant
 

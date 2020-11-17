@@ -41,7 +41,7 @@ DEFAULT_CONFIGURATION = {
 
     "USE_MOCKS": False, # use mocks for external calls
     "TIMEOUT": 0.001, # timeout for external calls
-    "REST_SERVICE_URL": "127.0.0.1:8079", # restaurant microservice url
+    "REST_SERVICE_URL": "http://127.0.0.1:8079/", # restaurant microservice url
 
 }
 
@@ -125,8 +125,10 @@ def new_booking():
     table = get_a_table(req["restaurant_id"],req["number_of_people"],req["booking_datetime"])
     if table is None: # an error occured (problem during the connection with the restaurant's microservice)
         return Error500().get()
-    elif table == -1: # The restaurant does not accept the booking
-        return Error("about:blank","Conflict",409,"It is not possible to make the booking").get()
+    elif table == -1: # The restaurant does not accept the booking because there are no free tables
+        return Error("about:blank","Conflict",409,"We are sorry! It is not possible to make the booking: there are no free tables!").get()
+    elif table == -2: # The restaurant does not accept the booking because it is closed
+        return Error("about:blank","Conflict",409,"We are sorry! It is not possible to make the booking: the restaurant is closed on that datetime!").get()
 
     booking = add_booking(req["user_id"],req["restaurant_id"],req["number_of_people"],req["booking_datetime"],table)
     if booking is None: # DB error
@@ -231,8 +233,10 @@ def put_booking(booking_id, entrance=False):
         table = get_a_table(q["restaurant_id"],req["number_of_people"],req["booking_datetime"]) # try to get a table
         if table is None: # an error occured (problem during the connection with the restaurant's microservice)
             return Error500().get()
-        elif table == -1: # The restaurant does not accept the change
-            return Error("about:blank","Conflict",409,"It is not possible to change the booking").get()
+        elif table == -1: # The restaurant does not accept the changes because there are no free tables
+            return Error("about:blank","Conflict",409,"We are sorry! It is not possible to change the booking: there are no free tables!").get()
+        elif table == -2: # The restaurant does not accept the changes because it is closed
+            return Error("about:blank","Conflict",409,"We are sorry! It is not possible to change the booking: the restaurant is closed on that datetime!").get()
 
         booking = update_booking(q["id"],req["number_of_people"],req["booking_datetime"],table)
         if booking is None: # DB error
