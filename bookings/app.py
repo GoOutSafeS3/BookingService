@@ -32,7 +32,7 @@ DEFAULT_CONFIGURATION = {
     "REMOVE_DB": False, # remove database file when the app starts
     "DB_DROPALL": False,
 
-    "IP": "127.0.0.1", # the app ip
+    "IP": "0.0.0.0", # the app ip
     "PORT": 8080, # the app port
     "DEBUG":True, # set debug mode
 
