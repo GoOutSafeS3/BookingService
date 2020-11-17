@@ -334,19 +334,19 @@ def put_fake_data():
     # add_booking(user_id, rest_id, number_of_people, booking_datetime, table_id)
     
     # 1: FUTURE BOOKING (USER 3, REST 4, TABLE 3)
-    add_booking(3, 4, 2, (datetime.datetime.now() + datetime.timedelta(days=2)), 3) 
+    add_booking(3, 4, 2, (datetime.datetime.now().replace(hour=10) + datetime.timedelta(days=2)), 3) 
     
     # 2: FUTURE BOOKING (USER 4, REST 3, TABLE 4)
-    add_booking(4, 3, 1, (datetime.datetime.now() + datetime.timedelta(days=1)), 4)
+    add_booking(4, 3, 1, (datetime.datetime.now().replace(hour=13) + datetime.timedelta(days=1)), 4)
     
     # 3: OLD BOOKING (USER 2, REST 2, TABLE 2)
-    add_booking(2, 2, 3, (datetime.datetime.now()), 2)
+    add_booking(2, 2, 3, (datetime.datetime.now().replace(hour=13)), 2)
     
     # 4: OLD BOOKING (USER 2, REST 2, TABLE 2)
-    add_booking(2, 2, 3, (datetime.datetime.now() - datetime.timedelta(days=1)), 2)
+    add_booking(2, 2, 3, (datetime.datetime.now().replace(hour=13) - datetime.timedelta(days=1)), 2)
     
     # 5: FUTURE BOOKING (USER 4, REST 3, TABLE 5)
-    add_booking(4, 3, 1, (datetime.datetime.now() + datetime.timedelta(days=2)), 5)
+    add_booking(4, 3, 1, (datetime.datetime.now().replace(hour=13) + datetime.timedelta(days=2)), 5)
     
     # 6: OLD BOOKING (USER 3, REST 3, TABLE 4)
-    add_booking(3, 3, 1, (datetime.datetime.now() - datetime.timedelta(days=2)), 4)
+    add_booking(3, 3, 1, (datetime.datetime.now().replace(hour=13) - datetime.timedelta(days=2)), 4)

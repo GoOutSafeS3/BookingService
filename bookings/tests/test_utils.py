@@ -32,7 +32,7 @@ class BookingsUtilsTests(unittest.TestCase):
         now = datetime.datetime.now()
 
         with self.app.app_context():
-            booking = (now + datetime.timedelta(days=1))
+            booking = (now.replace(hour=13) + datetime.timedelta(days=1))
             r = get_a_table(3, 1, booking)
             self.assertEqual(r, 6, msg=r) # expected table 6
 
@@ -51,7 +51,7 @@ class BookingsUtilsTests(unittest.TestCase):
         app.config['TESTING'] = True
 
         with app.app_context():
-            booking = (now + datetime.timedelta(days=1))
+            booking = (now.replace(hour=13) + datetime.timedelta(days=1))
             r = get_a_table(3, 1, booking)
             self.assertEqual(r, None, msg=r) # expected None in case of connections problems
 

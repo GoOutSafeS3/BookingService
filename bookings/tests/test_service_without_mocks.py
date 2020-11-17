@@ -35,7 +35,7 @@ class BookingsFailureTests(unittest.TestCase):
             "user_id":1,
             "restaurant_id":3,
             "number_of_people":3, 
-            "booking_datetime": (datetime.datetime.now() + datetime.timedelta(days=1)).isoformat()
+            "booking_datetime": (datetime.datetime.now().replace(hour=13) + datetime.timedelta(days=1)).isoformat()
             }
         response = client.post('/bookings',json=booking) 
         json = response.get_json() 

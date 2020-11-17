@@ -79,7 +79,7 @@ class BookingsTests(unittest.TestCase):
         """ Tests the edit service with good requests """
         client = self.app.test_client()
 
-        now = datetime.datetime.now()
+        now = datetime.datetime.now().replace(hour=13)
 
         response = client.get('/bookings?rest=3&begin='+now.isoformat()+"Z")
         json = response.get_json()
@@ -174,7 +174,7 @@ class BookingsTests(unittest.TestCase):
             "user_id":1,
             "restaurant_id":3,
             "number_of_people":3, 
-            "booking_datetime": (datetime.datetime.now() + datetime.timedelta(days=1)).isoformat()
+            "booking_datetime": (datetime.datetime.now().replace(hour=13) + datetime.timedelta(days=1)).isoformat()
             }
         response = client.post('/bookings',json=booking)
         json = response.get_json()
@@ -189,7 +189,7 @@ class BookingsTests(unittest.TestCase):
             "user_id":1,
             "restaurant_id":3,
             "number_of_people":2, 
-            "booking_datetime": (datetime.datetime.now() + datetime.timedelta(days=1)).isoformat()
+            "booking_datetime": (datetime.datetime.now().replace(hour=13) + datetime.timedelta(days=1)).isoformat()
             }
         response = client.post('/bookings',json=booking)
         json = response.get_json()
@@ -200,7 +200,7 @@ class BookingsTests(unittest.TestCase):
             "user_id":1,
             "restaurant_id":3,
             "number_of_people":1, 
-            "booking_datetime": (datetime.datetime.now() + datetime.timedelta(days=1)).isoformat()
+            "booking_datetime": (datetime.datetime.now().replace(hour=13) + datetime.timedelta(days=1)).isoformat()
             }
         response = client.post('/bookings',json=booking)
         json = response.get_json()
