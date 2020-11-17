@@ -127,3 +127,9 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Application specific
+
+report.html
+assets/
+*.db
