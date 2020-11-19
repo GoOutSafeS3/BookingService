@@ -79,7 +79,7 @@ def get_bookings(user=None, rest=None, table=None, begin=None, end=None):
         url += "begin="+str(begin)+"&"
 
     if end is not None:
-        url += "user="+str(end)+"&"
+        url += "end="+str(end)+"&"
 
     return _get(url)
 
