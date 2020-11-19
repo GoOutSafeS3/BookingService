@@ -112,6 +112,13 @@ def delete_booking(id):
     return _delete(BOOKINGS_SERVICE+"bookings/"+str(id))
 
 if __name__ == "__main__":
+    print(new_booking(1,3,1,(datetime.datetime.now()+datetime.timedelta(days=2)).isoformat()),"\n")
+    print(new_booking(1,3,1,(datetime.datetime.now()+datetime.timedelta(days=2)).isoformat()),"\n")
+    print(new_booking(1,3,1,(datetime.datetime.now()+datetime.timedelta(days=2)).isoformat()),"\n")
+    print(edit_booking(7,2),"\n")
+    print(edit_booking(7,10),"\n")
+    print(edit_booking(7,1),"\n")
+    print(edit_booking(7,2,(datetime.datetime.now()+datetime.timedelta(days=2,minutes=30)).isoformat()),"\n")
     print(get_bookings(rest=3),"\n")
     print(get_a_booking(1),"\n")
     print(get_a_booking(100),"\n")

@@ -249,7 +249,7 @@ def put_booking(booking_id, entrance=False):
 
     if (q["booking_datetime"] != req["booking_datetime"]) or (q["number_of_people"] != req["number_of_people"]):
         
-        table = get_a_table(q["restaurant_id"],req["number_of_people"],req["booking_datetime"]) # try to get a table
+        table = get_a_table(q["restaurant_id"],req["number_of_people"],req["booking_datetime"],excluded=booking_id) # try to get a table
         
         if table is None: # an error occured (problem during the connection with the restaurant's microservice)
             return Error500().get()

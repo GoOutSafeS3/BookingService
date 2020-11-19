@@ -184,13 +184,26 @@ def update_booking(booking_id, number_of_people, booking_datetime, table_id, ent
         db.session.rollback()
         return None
 
-def get_a_table(restaurant_id, number_of_people, booking_datetime):
-    """ 
-    Return a free table if it is available, otherwise
+def get_a_table(restaurant_id, number_of_people, booking_datetime, excluded=-1):
+    """ Return a free table if it is available, otherwise
         - Return -1 if there are no free tables
         - Return -2 if the restaurant is closed
 
     Return None if it is impossible to connect with the restaurant microservice.
+
+    Parameters:
+        - restaurant_id: the id of the restaurant
+        - number_of_people: the number of people for the booking
+        - booking_datetime: the datetime of the booking
+        - excluded: a booking that you want to exclude when searching for free tables 
+                    (-1 by default (i.e. no exclusions: the ids are positive)). 
+                    It is used only during the edit phase of a booking to prevent the booking you want to modify 
+                    from being considered. 
+                    For example, if not used, the request to move the booking by half an hour or 
+                    add a seat (if the capacity of the table allows it) could not be accepted 
+                    as the same booking would be seen as non-modifiable and 
+                    another table would be searched, when maybe, what you already have is fine.
+
     """
 
     is_open, rest = restaurant_is_open(restaurant_id, booking_datetime) # check is the restaurant is open on that date
@@ -215,8 +228,9 @@ def get_a_table(restaurant_id, number_of_people, booking_datetime):
         .filter(Booking.restaurant_id == restaurant_id)\
         .filter(starting_period < Booking.booking_datetime)\
         .filter(Booking.booking_datetime < ending_period )\
+        .filter(Booking.id != excluded)\
         .all()
-
+        
     free_tables = [t for t in tables if ( ((t["id"],) not in occupied) and (t["capacity"] >= number_of_people) )] # returns the free table usable by this number of people
     free_tables.sort(key=lambda x:x["capacity"]) # order the tables from the smaller
 

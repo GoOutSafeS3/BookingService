@@ -85,12 +85,10 @@ class BookingsTests(unittest.TestCase):
         self.assertEqual(response.status_code, 201, msg=json) # good request: created
         self.assertEqual(json["table_id"], 5, msg=json) # right table
 
-        """ Now there is no more space in restaurant 3, so now i try to change with a table with more capacity """
-
         booking = {
             "number_of_people":10, 
             }
-        response = client.put('/bookings/7',json=booking) # same booking again
+        response = client.put('/bookings/7',json=booking) # i try to change the booking increasing the capacity but there are no tables with such capacity
         json = response.get_json()
         self.assertEqual(response.status_code, 409, msg=json) # no free tables (now) no free tables with such capacity
 
@@ -146,7 +144,40 @@ class BookingsTests(unittest.TestCase):
         self.assertEqual(json[0]["id"], 2, msg=json) # same id
         self.assertEqual(json[0]["number_of_people"], 3, msg=json) # right number
         self.assertEqual(json[0]["booking_datetime"], (now + datetime.timedelta(days=2)).isoformat()+"Z", msg=json) # right datetime
-   
+
+        booking = {
+            "user_id":1,
+            "restaurant_id":3,
+            "number_of_people":1, 
+            "booking_datetime": (datetime.datetime.now().replace(hour=13) + datetime.timedelta(days=1)).isoformat()
+            }
+        response = client.post('/bookings',json=booking) # first i create a new booking
+        json = response.get_json()
+        self.assertEqual(response.status_code, 201, msg=json) # good request: created
+        self.assertEqual(json["table_id"], 6, msg=json) # right table
+
+        response = client.post('/bookings',json=booking) # and another booking
+        json = response.get_json()
+        self.assertEqual(response.status_code, 201, msg=json) # good request: created
+        self.assertEqual(json["table_id"], 5, msg=json) # right table
+
+        response = client.post('/bookings',json=booking) # and another booking
+        json = response.get_json()
+        self.assertEqual(response.status_code, 201, msg=json) # good request: created
+        self.assertEqual(json["table_id"], 4, msg=json) # right table
+
+
+        """ Now there is no more space in restaurant 3 """
+
+        booking = {
+            "number_of_people":2, 
+            "booking_datetime": (datetime.datetime.now().replace(hour=13,minute=30) + datetime.timedelta(days=1)).isoformat()
+            }
+        response = client.put('/bookings/7',json=booking) # but i can change my booking if the same table i booked is still good 
+        json = response.get_json()
+        self.assertEqual(response.status_code, 200, msg=json) # the requeste is accepted because the table i had is still good
+        self.assertEqual(json["table_id"], 6, msg=json) # still the same table
+    
     def test_new_booking_400_409(self):
         """ Tests the new bookings service with bad requests """
         client = self.app.test_client()
