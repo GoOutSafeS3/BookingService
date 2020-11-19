@@ -40,6 +40,18 @@ paths:
             type: string
             format: date-time
           description: The end of the research period
+        - in: query
+          name: begin_entrance
+          schema:
+            type: string
+            format: date-time
+          description: The beginning of the research period (for the entrance time)
+        - in: query
+          name: end_entrance
+          schema:
+            type: string
+            format: date-time
+          description: The end of the research period ( for the entrance time)
       responses:
         200:
           description: Return all bookings

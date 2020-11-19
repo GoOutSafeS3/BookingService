@@ -74,6 +74,26 @@ class BookingsTests(unittest.TestCase):
         json = response.get_json()
         self.assertEqual(response.status_code, 400, msg=json) # try to change a past booking
 
+        booking = {
+            "user_id":1,
+            "restaurant_id":3,
+            "number_of_people":3, 
+            "booking_datetime": (datetime.datetime.now().replace(hour=13) + datetime.timedelta(days=1)).isoformat()
+            }
+        response = client.post('/bookings',json=booking) # first i create a new booking
+        json = response.get_json()
+        self.assertEqual(response.status_code, 201, msg=json) # good request: created
+        self.assertEqual(json["table_id"], 5, msg=json) # right table
+
+        """ Now there is no more space in restaurant 3, so now i try to change with a table with more capacity """
+
+        booking = {
+            "number_of_people":10, 
+            }
+        response = client.put('/bookings/7',json=booking) # same booking again
+        json = response.get_json()
+        self.assertEqual(response.status_code, 409, msg=json) # no free tables (now) no free tables with such capacity
+
 
     def test_edit_booking(self):
         """ Tests the edit service with good requests """
@@ -127,7 +147,7 @@ class BookingsTests(unittest.TestCase):
         self.assertEqual(json[0]["number_of_people"], 3, msg=json) # right number
         self.assertEqual(json[0]["booking_datetime"], (now + datetime.timedelta(days=2)).isoformat()+"Z", msg=json) # right datetime
    
-    def test_new_booking_400(self):
+    def test_new_booking_400_409(self):
         """ Tests the new bookings service with bad requests """
         client = self.app.test_client()
 
@@ -166,6 +186,16 @@ class BookingsTests(unittest.TestCase):
         json = response.get_json()
         self.assertEqual(response.status_code, 400, msg=json) # try to book for zero people
 
+        booking = {
+            "user_id":1,
+            "restaurant_id":2,
+            "number_of_people":1, 
+            "booking_datetime": (datetime.datetime.now().replace(hour=18) + datetime.timedelta(days=1)).isoformat()
+            }
+        response = client.post('/bookings',json=booking)
+        json = response.get_json()
+        self.assertEqual(response.status_code, 409, msg=json) # try to book in a closed restaurant
+
     def test_new_booking(self):
         """ Tests the new bookings service with good requests """
         client = self.app.test_client()
@@ -183,7 +213,7 @@ class BookingsTests(unittest.TestCase):
 
         response = client.post('/bookings',json=booking) # same booking again
         json = response.get_json()
-        self.assertEqual(response.status_code, 409, msg=json) # no free tables (now) 'cause too much people
+        self.assertEqual(response.status_code, 409, msg=json) # no free tables (now) 'cause too much people (no free tables with such capacity)
 
         booking = {
             "user_id":1,
@@ -300,14 +330,14 @@ class BookingsTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200, msg="Datetime: "+now+"\n"+response.get_data(as_text=True)) 
         self.assertEqual(len(json), 3, msg=json) # right request
         for e in json:
-            self.assertIn(e["id"], [1,2,5], msg=json) 
+            self.assertIn(e["id"], [1,2,5], msg=json) # a "safety" check
 
         response = client.get('/bookings?end='+now) 
         json = response.get_json() 
         self.assertEqual(response.status_code, 200, msg="Datetime: "+now+"\n"+response.get_data(as_text=True)) 
         self.assertEqual(len(json), 3, msg=json) # right request
         for e in json:
-            self.assertIn(e["id"], [3,4,6], msg=json)  
+            self.assertIn(e["id"], [3,4,6], msg=json) # a "safety" check
 
         tomorrow = (datetime.datetime.now() + datetime.timedelta(days=1)).isoformat()
         response = client.get('/bookings?begin='+now+'&end='+tomorrow) 
@@ -315,6 +345,58 @@ class BookingsTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200, msg="Datetimes: "+now+", "+tomorrow+"\n"+response.get_data(as_text=True)) 
         self.assertEqual(len(json), 1, msg=json) 
         self.assertEqual(json[0]["id"], 2, msg=json) # right request
+
+    def test_bookings_filter_by_entrance_date(self): 
+        """ Tests get the list of all bookings that match the filters (only filters that work with entrance datetimes)"""
+        client = self.app.test_client() 
+
+        now = datetime.datetime.now().isoformat()
+
+        """ There are no bookings with entrance in this moment """
+
+        response = client.get('/bookings?begin_entrance='+now) 
+        json = response.get_json() 
+        self.assertEqual(response.status_code, 200, msg="Datetime: "+now+"\n"+response.get_data(as_text=True)) 
+        self.assertEqual(len(json), 0, msg=json) # right request but no entrance zero
+
+        response = client.get('/bookings?end_entrance='+now) 
+        json = response.get_json() 
+        self.assertEqual(response.status_code, 200, msg="Datetime: "+now+"\n"+response.get_data(as_text=True)) 
+        self.assertEqual(len(json), 0, msg=json) # right request but no entrance so zero
+
+        response = client.put('/bookings/2?entrance=true',json={})  # set the entrance 
+        json = response.get_json() 
+        self.assertEqual(response.status_code, 200, msg=json) # good request: marked
+        self.assertEqual(json["id"], 2, msg=json) # a "safety" check
+        self.assertIsNotNone(json["entrance_datetime"], msg=json) # another "safety" check
+
+        tomorrow = (datetime.datetime.now() + datetime.timedelta(days=1)).isoformat()
+        response = client.get('/bookings?begin_entrance='+now+'&end_entrance='+tomorrow) 
+        json = response.get_json() 
+        self.assertEqual(response.status_code, 200, msg="Datetimes: "+now+", "+tomorrow+"\n"+response.get_data(as_text=True)) 
+        self.assertEqual(len(json), 1, msg=json) 
+        self.assertEqual(json[0]["id"], 2, msg=json) # right request
+
+        response = client.put('/bookings/1?entrance=true',json={})  # set another entrance 
+        json = response.get_json() 
+        self.assertEqual(response.status_code, 200, msg=json) # good request: marked
+        self.assertEqual(json["id"], 1, msg=json) # a "safety" check
+        self.assertIsNotNone(json["entrance_datetime"], msg=json) # another "safety" check
+
+        response = client.get('/bookings?begin_entrance='+now) 
+        json = response.get_json() 
+        self.assertEqual(response.status_code, 200, msg="Datetime: "+now+"\n"+response.get_data(as_text=True)) 
+        self.assertEqual(len(json), 2, msg=json) # right request
+        for e in json:
+            self.assertIn(e["id"], [1,2], msg=json) # a "safety" check
+
+
+        response = client.get('/bookings?end_entrance='+tomorrow) 
+        json = response.get_json() 
+        self.assertEqual(response.status_code, 200, msg="Datetime: "+now+"\n"+response.get_data(as_text=True)) 
+        self.assertEqual(len(json), 2, msg=json) # right 
+        for e in json:
+            self.assertIn(e["id"], [1,2], msg=json) # a "safety" check
 
 
     def test_bookings_filter_wrong_date(self): 
@@ -337,6 +419,28 @@ class BookingsTests(unittest.TestCase):
         response = client.get('/bookings?begin='+now+'&end='+tomorrow) 
         json = response.get_json() 
         self.assertEqual(response.status_code, 400, msg="Datetimes: "+now+", "+tomorrow+"\n"+response.get_data(as_text=True)) # bad formats
+
+    def test_bookings_filter_wrong_entrance_date(self): 
+        """ Tests get the list of all bookings that match the filters (only filters that work with entrance datetimes)
+        with wrong datetime format
+        """
+        client = self.app.test_client() 
+
+        now = "now"
+
+        response = client.get('/bookings?begin_entrance='+now) 
+        json = response.get_json() 
+        self.assertEqual(response.status_code, 400, msg="Datetime: "+now+"\n"+response.get_data(as_text=True)) # bad format
+
+        response = client.get('/bookings?end_entrance='+now) 
+        json = response.get_json() 
+        self.assertEqual(response.status_code, 400, msg="Datetime: "+now+"\n"+response.get_data(as_text=True))  # bad format
+
+        tomorrow = "tomorrow"
+        response = client.get('/bookings?begin_entrance='+now+'&end='+tomorrow) 
+        json = response.get_json() 
+        self.assertEqual(response.status_code, 400, msg="Datetimes: "+now+", "+tomorrow+"\n"+response.get_data(as_text=True)) # bad formats
+
 
     def test_bookings_filter_id_and_date(self):
         """ Tests get the list of all bookings that match the filters (both ids and datetimes)"""

@@ -44,7 +44,7 @@ DEFAULT_CONFIGURATION = {
 
 }
 
-def get_bookings(user=None, rest=None, table=None, begin=None, end=None):
+def get_bookings(user=None, rest=None, table=None, begin=None, end=None, begin_entrance=None, end_entrance=None):
     """ Return the list of bookings.
 
     GET /bookings?[user=U_ID&][rest=R_ID&][table=T_ID&][begin=BEGING_DT&][end=END_DT&]
@@ -58,6 +58,8 @@ def get_bookings(user=None, rest=None, table=None, begin=None, end=None):
     - table: All the booking of a specific table (by id)
     - begin: All bookings from a certain date onwards (datetime ISO 8601 - Chapter 5.6)
     - end: All bookings up to a certain date onwards (datetime ISO 8601 - Chapter 5.6)
+    - begin_entrance: All bookings from a certain entrance date onwards (datetime ISO 8601 - Chapter 5.6)
+    - end_entrance: All bookings up to a certain entrance date onwards (datetime ISO 8601 - Chapter 5.6)
 
     If begin and not end is specified, all those starting from begin are taken. Same thing for end.
 
@@ -70,22 +72,40 @@ def get_bookings(user=None, rest=None, table=None, begin=None, end=None):
     
     if user is not None:
         q = q.filter_by(user_id=user)
+
     if rest is not None:
         q = q.filter_by(restaurant_id=rest)
+
     if table is not None:
         q = q.filter_by(table_id=table)
+
     if begin is not None:
         try:
             begin = dateutil.parser.parse(begin)
         except:
             return Error400("Begin Arguments is not a valid datetime").get()
         q = q.filter(Booking.booking_datetime >= begin)
+
     if end is not None:
         try:
             end = dateutil.parser.parse(end)
         except:
             return Error400("End Arguments is not a valid datetime").get()
         q = q.filter(Booking.booking_datetime <= end)
+
+    if begin_entrance is not None:
+        try:
+            begin_entrance = dateutil.parser.parse(begin_entrance)
+        except:
+            return Error400("begin_entrance Arguments is not a valid datetime").get()
+        q = q.filter(Booking.entrance_datetime >= begin_entrance)
+
+    if end_entrance is not None:
+        try:
+            end_entrance = dateutil.parser.parse(end_entrance)
+        except:
+            return Error400("end_entrance Arguments is not a valid datetime").get()
+        q = q.filter(Booking.entrance_datetime <= end_entrance)
 
     return [p.dump() for p in q], 200
 
@@ -230,7 +250,7 @@ def put_booking(booking_id, entrance=False):
     if (q["booking_datetime"] != req["booking_datetime"]) or (q["number_of_people"] != req["number_of_people"]):
         
         table = get_a_table(q["restaurant_id"],req["number_of_people"],req["booking_datetime"]) # try to get a table
-        print(table)
+        
         if table is None: # an error occured (problem during the connection with the restaurant's microservice)
             return Error500().get()
         elif table == -1: # The restaurant does not accept the changes because there are no free tables
