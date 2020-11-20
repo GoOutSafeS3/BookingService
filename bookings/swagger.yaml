@@ -109,7 +109,7 @@ paths:
   /bookings/{booking_id}: ################################# /BOOKINGS/ID #######################################
     get: ########################## GET A BOOKING
       tags:
-      - Bookings
+      - Booking
       summary: Get a single booking
       operationId: app.get_booking
       parameters:
@@ -135,7 +135,7 @@ paths:
           
     put: ########################## EDIT A BOOKING
       tags:
-      - Bookings
+      - Booking
       summary: Edit a booking
       operationId: app.put_booking
       parameters:
@@ -192,7 +192,7 @@ paths:
           
     delete: ########################## DELETE A BOOKING
       tags:
-      - Bookings
+      - Booking
       summary: Delete a booking
       operationId: app.delete_booking
       parameters:
