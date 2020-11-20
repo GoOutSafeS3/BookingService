@@ -6,6 +6,8 @@ class Booking(db.Model):
     """ Stores the bookings """
     
     __tablename__ = 'booking'
+    __table_args__ = {'sqlite_autoincrement':True}
+    
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     user_id = db.Column(db.Integer)
     restaurant_id = db.Column(db.Integer)

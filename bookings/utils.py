@@ -273,9 +273,6 @@ def restaurant_is_open(restaurant_id, booking_datetime):
         return (False,rest)
 
 
-def put_integration_fake_data():
-    put_fake_data()
-
 def put_fake_data():
     """
     Enter fake data (useful for testing purposes).

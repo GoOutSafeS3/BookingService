@@ -63,7 +63,7 @@ def _delete(url):
         return None,None
 
 
-def get_bookings(user=None, rest=None, table=None, begin=None, end=None):
+def get_bookings(user=None, rest=None, table=None, begin=None, end=None, begin_entrance=None, end_entrance=None):
     url = BOOKINGS_SERVICE+"bookings?"
 
     if user is not None:
@@ -81,6 +81,12 @@ def get_bookings(user=None, rest=None, table=None, begin=None, end=None):
     if end is not None:
         url += "end="+str(end)+"&"
 
+    if begin_entrance is not None:
+        url += "begin_entrance="+str(begin_entrance)+"&"
+
+    if end_entrance is not None:
+        url += "end_entrance="+str(end_entrance)+"&"
+
     return _get(url)
 
 def get_a_booking(id):
@@ -96,7 +102,7 @@ def new_booking(user_id, rest_id, number_of_people, booking_datetime):
 
     return _post(BOOKINGS_SERVICE+"bookings",booking)
 
-def edit_booking(booking_id, number_of_people=None, booking_datetime=None):
+def edit_booking(booking_id, number_of_people=None, booking_datetime=None, entrance=False):
     booking = {
     }
 
@@ -106,7 +112,12 @@ def edit_booking(booking_id, number_of_people=None, booking_datetime=None):
     if booking_datetime is not None:
         booking["booking_datetime"] = booking_datetime
 
-    return _put(BOOKINGS_SERVICE+"bookings/"+str(booking_id),booking)
+    url = BOOKINGS_SERVICE+"bookings/"+str(booking_id)
+
+    if entrance:
+        url += "?entrance=true"
+
+    return _put(url,booking)
 
 def delete_booking(id):
     return _delete(BOOKINGS_SERVICE+"bookings/"+str(id))
@@ -130,3 +141,6 @@ if __name__ == "__main__":
     print(delete_booking(5),"\n")
     print(delete_booking(6),"\n")
     print(get_bookings(),"\n")
+    print(get_bookings(begin_entrance=datetime.datetime.now()-datetime.timedelta(days=1), end_entrance=datetime.datetime.now()+datetime.timedelta(days=2)),"\n")
+    print(edit_booking(1,entrance=True),"\n")
+    print(get_bookings(begin_entrance=datetime.datetime.now()-datetime.timedelta(days=1), end_entrance=datetime.datetime.now()+datetime.timedelta(days=2)),"\n")

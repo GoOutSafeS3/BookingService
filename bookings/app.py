@@ -13,7 +13,7 @@ from connexion import NoContent, request
 
 from bookings.orm import db, Booking
 
-from bookings.utils import add_booking, get_a_table, update_booking, put_fake_data, put_integration_fake_data
+from bookings.utils import add_booking, get_a_table, update_booking, put_fake_data
 
 from bookings.errors import Error, Error400, Error404, Error500
 
@@ -30,7 +30,6 @@ DEFAULT_CONFIGURATION = {
     "FAKE_DATA": False, # insert some default data in the database (for tests)
     "REMOVE_DB": False, # remove database file when the app starts
     "DB_DROPALL": False,
-    "INTEGRATION_FAKE_DATA": False, # fake data used in integration tests
 
     "IP": "0.0.0.0", # the app ip
     "PORT": 8080, # the app port
@@ -386,11 +385,6 @@ def setup(application, config):
         logging.info("- GoOutSafe:Bookings Adding Fake Data...")
         with application.app_context():
             put_fake_data()
-
-    if config["INTEGRATION_FAKE_DATA"]: #add fake data (for testing)
-        logging.info("- GoOutSafe:Bookings Adding Integration Fake Data...")
-        with application.app_context():
-            put_integration_fake_data()
 
 def create_app(configuration=None):
     logging.basicConfig(level=logging.INFO)

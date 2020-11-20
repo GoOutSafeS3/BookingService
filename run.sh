@@ -1,5 +1,5 @@
 #!/bin/sh
-
+export PYTHONPATH="."
 case "$1" in
     "unittests-report")
         pytest --cov=bookings --cov-report term-missing --cov-report html --html=report.html
