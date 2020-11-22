@@ -243,6 +243,8 @@ def put_booking(booking_id, entrance=False):
             return Error400("booking_datetime must be in the future").get()
     else: # use the "old" datetime
         req["booking_datetime"] = q["booking_datetime"]
+        if q["booking_datetime"] < now:
+            return Error400("You cannot change a past booking").get()
 
     if "number_of_people" not in req or req["number_of_people"] is None:
         req["number_of_people"] = q["number_of_people"]

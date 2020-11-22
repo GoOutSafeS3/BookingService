@@ -102,7 +102,7 @@ class BookingsTests(unittest.TestCase):
         response = client.get('/bookings?rest=3&begin='+now.isoformat()+"Z")
         json = response.get_json()
         self.assertEqual(response.status_code, 200, msg=json)
-        self.assertEqual(len(json), 2, msg=json) # just for safety
+        self.assertEqual(len(json), 3, msg=json) # just for safety
 
         booking = {
             "number_of_people":2
@@ -113,7 +113,7 @@ class BookingsTests(unittest.TestCase):
         response = client.get('/bookings?rest=3&begin='+now.isoformat()+"Z") # just to check
         json = response.get_json()
         self.assertEqual(response.status_code, 200, msg=json)
-        self.assertEqual(len(json), 2, msg=json)
+        self.assertEqual(len(json), 3, msg=json)
         self.assertEqual(json[0]["id"], 2, msg=json) # same id
         self.assertEqual(json[0]["number_of_people"], 2, msg=json) # right number
 
@@ -126,7 +126,7 @@ class BookingsTests(unittest.TestCase):
         response = client.get('/bookings?rest=3&begin='+now.isoformat()+"Z") # just to check
         json = response.get_json()
         self.assertEqual(response.status_code, 200, msg=json) 
-        self.assertEqual(len(json), 2, msg=json)
+        self.assertEqual(len(json), 3, msg=json)
         self.assertEqual(json[0]["id"], 2, msg=json) # same id
         self.assertEqual(json[0]["booking_datetime"], (now + datetime.timedelta(days=1)).isoformat()+"Z", msg=json) # right datetime
 
@@ -140,7 +140,7 @@ class BookingsTests(unittest.TestCase):
         response = client.get('/bookings?rest=3&begin='+now.isoformat()+"Z") # just to check
         json = response.get_json()
         self.assertEqual(response.status_code, 200, msg=json)
-        self.assertEqual(len(json), 2, msg=json)
+        self.assertEqual(len(json), 3, msg=json)
         self.assertEqual(json[0]["id"], 2, msg=json) # same id
         self.assertEqual(json[0]["number_of_people"], 3, msg=json) # right number
         self.assertEqual(json[0]["booking_datetime"], (now + datetime.timedelta(days=2)).isoformat()+"Z", msg=json) # right datetime
@@ -173,7 +173,7 @@ class BookingsTests(unittest.TestCase):
             "number_of_people":2, 
             "booking_datetime": (datetime.datetime.now().replace(hour=13,minute=30) + datetime.timedelta(days=1)).isoformat()
             }
-        response = client.put('/bookings/7',json=booking) # but i can change my booking if the same table i booked is still good 
+        response = client.put('/bookings/9',json=booking) # but i can change my booking if the same table i booked is still good 
         json = response.get_json()
         self.assertEqual(response.status_code, 200, msg=json) # the requeste is accepted because the table i had is still good
         self.assertEqual(json["table_id"], 6, msg=json) # still the same table
@@ -292,7 +292,7 @@ class BookingsTests(unittest.TestCase):
         response = client.get('/bookings') 
         json = response.get_json() 
         self.assertEqual(response.status_code, 200, msg=json) # OK
-        self.assertEqual(len(json), 6, msg=json) # right length
+        self.assertEqual(len(json), 8, msg=json) # right length
 
     def test_bookings_filter_by_id(self): 
         """ Tests get the list of all bookings that match the filters (only filters that work with ids)"""
@@ -310,9 +310,9 @@ class BookingsTests(unittest.TestCase):
         response = client.get('/bookings?user=3') 
         json = response.get_json() 
         self.assertEqual(response.status_code, 200, msg=json) 
-        self.assertEqual(len(json), 2, msg=json) # right request
+        self.assertEqual(len(json), 3, msg=json) # right request
         for e in json:
-            self.assertIn(e["id"], [1,6], msg=json)
+            self.assertIn(e["id"], [1,6, 8], msg=json)
 
         response = client.get('/bookings?rest=1') 
         json = response.get_json() 
@@ -322,9 +322,9 @@ class BookingsTests(unittest.TestCase):
         response = client.get('/bookings?rest=3') 
         json = response.get_json() 
         self.assertEqual(response.status_code, 200, msg=json) 
-        self.assertEqual(len(json), 3, msg=json) # right request
+        self.assertEqual(len(json), 5, msg=json) # right request
         for e in json:
-            self.assertIn(e["id"], [2,5,6], msg=json)
+            self.assertIn(e["id"], [2,5,6,7,8], msg=json)
 
         response = client.get('/bookings?table=1') 
         json = response.get_json() 
@@ -334,9 +334,9 @@ class BookingsTests(unittest.TestCase):
         response = client.get('/bookings?table=4') 
         json = response.get_json() 
         self.assertEqual(response.status_code, 200, msg=json) 
-        self.assertEqual(len(json), 2, msg=json) # right request
+        self.assertEqual(len(json), 3, msg=json) # right request
         for e in json:
-            self.assertIn(e["id"], [2,6], msg=json)
+            self.assertIn(e["id"], [2,6,8], msg=json)
 
         response = client.get('/bookings?rest=4&user=2') 
         json = response.get_json() 
@@ -359,16 +359,16 @@ class BookingsTests(unittest.TestCase):
         response = client.get('/bookings?begin='+now) 
         json = response.get_json() 
         self.assertEqual(response.status_code, 200, msg="Datetime: "+now+"\n"+response.get_data(as_text=True)) 
-        self.assertEqual(len(json), 3, msg=json) # right request
+        self.assertEqual(len(json), 4, msg=json) # right request
         for e in json:
-            self.assertIn(e["id"], [1,2,5], msg=json) # a "safety" check
+            self.assertIn(e["id"], [1,2,5,7], msg=json) # a "safety" check
 
         response = client.get('/bookings?end='+now) 
         json = response.get_json() 
         self.assertEqual(response.status_code, 200, msg="Datetime: "+now+"\n"+response.get_data(as_text=True)) 
-        self.assertEqual(len(json), 3, msg=json) # right request
+        self.assertEqual(len(json), 4, msg=json) # right request
         for e in json:
-            self.assertIn(e["id"], [3,4,6], msg=json) # a "safety" check
+            self.assertIn(e["id"], [3,4,6,8], msg=json) # a "safety" check
 
         tomorrow = (datetime.datetime.now() + datetime.timedelta(days=1)).isoformat()
         response = client.get('/bookings?begin='+now+'&end='+tomorrow) 
@@ -481,9 +481,9 @@ class BookingsTests(unittest.TestCase):
         response = client.get('/bookings?user=4&begin='+now) 
         json = response.get_json() 
         self.assertEqual(response.status_code, 200, msg="Datetime: "+now+"\n"+response.get_data(as_text=True)) 
-        self.assertEqual(len(json), 2, msg=json) # good request
+        self.assertEqual(len(json), 3, msg=json) # good request
         for e in json:
-            self.assertIn(e["id"], [2,5], msg=json) # a "safety" check
+            self.assertIn(e["id"], [2,5,7], msg=json) # a "safety" check
 
         now = "now"
         response = client.get('/bookings?user=4&begin='+now) 

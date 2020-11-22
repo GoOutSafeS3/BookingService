@@ -308,15 +308,15 @@ def put_fake_data():
                 - TABLE 4
         USERS:
             - 1: NO BOOKINGS 
-            - 2: 2 OLD BOOKINGS 
-            - 3: 1 NEW AND 1 OLD 
+            - 2: 3 OLD BOOKINGS 
+            - 3: 1 NEW AND 2 OLD 
             - 4: 2 NEW 
         
         RESTAURANTS:
             - 1: NO BOOKINGS 
             - 2: 2 OLD BOOKINGS 
-            - 3: 2 NEW AND 1 OLD 
-            - 4: 1 NEW 
+            - 3: 2 NEW AND 3 OLD 
+            - 4: 1 NEW
 
         TABLES:
             - 1: NO BOOKINGS 
@@ -331,14 +331,14 @@ def put_fake_data():
                 - CAPACITY: 2
                 - REST: 4
                 - BOOKINGS: [1]
-            - 4: TABLE WITH A OLD AND A NEW BOOKING
+            - 4: TABLE WITH TWO OLD AND A NEW BOOKING
                 - CAPACITY: 5
                 - REST: 3
-                - BOOKINGS: [2, 6]
-            - 5: TABLE WITH A NEW BOOKING
+                - BOOKINGS: [2, 6, 8]
+            - 5: TABLE WITH A NEW BOOKING AND AN OLD
                 - CAPACITY: 4
                 - REST: 3
-                - BOOKINGS: [5]
+                - BOOKINGS: [5, 7]
             - 6: NO BOOKINGS
                 - CAPACITY: 2
                 - REST: 3
@@ -364,3 +364,9 @@ def put_fake_data():
     
     # 6: OLD BOOKING (USER 3, REST 3, TABLE 4)
     add_booking(3, 3, 1, (datetime.datetime.now().replace(hour=13) - datetime.timedelta(days=2)), 4)
+
+    # 7: OLD BOOKING (USER 2, REST 3, TABLE 5)
+    add_booking(4, 3, 2, (datetime.datetime.now().replace(hour=13) + datetime.timedelta(days=10)), 5)
+    
+    # 8: OLD BOOKING (USER 3, REST 3, TABLE 4)
+    add_booking(3, 3, 1, (datetime.datetime.now().replace(hour=13) - datetime.timedelta(days=10)), 4)
