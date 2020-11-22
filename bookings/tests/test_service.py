@@ -374,8 +374,7 @@ class BookingsTests(unittest.TestCase):
         response = client.get('/bookings?begin='+now+'&end='+tomorrow) 
         json = response.get_json() 
         self.assertEqual(response.status_code, 200, msg="Datetimes: "+now+", "+tomorrow+"\n"+response.get_data(as_text=True)) 
-        self.assertEqual(len(json), 1, msg=json) 
-        self.assertEqual(json[0]["id"], 2, msg=json) # right request
+        self.assertEqual(len(json), 0, msg=json) # right request but no mathces
 
     def test_bookings_filter_by_entrance_date(self): 
         """ Tests get the list of all bookings that match the filters (only filters that work with entrance datetimes)"""

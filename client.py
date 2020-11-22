@@ -4,7 +4,7 @@ import datetime
 import requests
 
 BOOKINGS_SERVICE = "http://localhost:8080/"
-TIMEOUT = 1
+TIMEOUT = 2
 
 def _get(url):
     """ Makes a get request with a timeout.

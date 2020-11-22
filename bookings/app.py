@@ -39,15 +39,15 @@ DEFAULT_CONFIGURATION = {
     "SQLALCHEMY_TRACK_MODIFICATIONS": False,
 
     "USE_MOCKS": False, # use mocks for external calls
-    "TIMEOUT": 0.001, # timeout for external calls
-    "REST_SERVICE_URL": "http://127.0.0.1:8079/", # restaurant microservice url
+    "TIMEOUT": 2, # timeout for external calls
+    "REST_SERVICE_URL": "http://restaurants:8080/", # restaurant microservice url
 
 }
 
 def get_bookings(user=None, rest=None, table=None, begin=None, end=None, begin_entrance=None, end_entrance=None):
     """ Return the list of bookings.
 
-    GET /bookings?[user=U_ID&][rest=R_ID&][table=T_ID&][begin=BEGING_DT&][end=END_DT&]
+    GET /bookings?[user=U_ID&][rest=R_ID&][table=T_ID&][begin=BEGING_DT&][end=END_DT&][begin_entrance=BEGING_ENT_DT&][end_entrance=END_ENT_DT&]
 
     It's possible to filter the bookings thanks the query's parameters.
     The parameters can be overlapped in any way.

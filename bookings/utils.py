@@ -257,15 +257,15 @@ def restaurant_is_open(restaurant_id, booking_datetime):
         booking = now.replace( hour=booking_datetime.hour, minute=booking_datetime.minute, second=0, microsecond=0 )
 
         if rest["first_opening_hour"] is not None and rest["first_closing_hour"] is not None:
-            opening = now.replace( hour=rest["first_opening_hour"], minute=0, second=0, microsecond=0 )
-            closing = now.replace( hour=rest["first_closing_hour"], minute=0, second=0, microsecond=0 )
+            opening = now.replace( hour=int(rest["first_opening_hour"]), minute=0, second=0, microsecond=0 )
+            closing = now.replace( hour=int(rest["first_closing_hour"]), minute=0, second=0, microsecond=0 )
 
             if opening <= booking <= closing:
                 return (True,rest)
 
         if rest["second_opening_hour"] is not None and rest["second_closing_hour"] is not None:
-            opening = now.replace( hour=rest["second_opening_hour"], minute=0, second=0, microsecond=0 )
-            closing = now.replace( hour=rest["second_closing_hour"], minute=0, second=0, microsecond=0 )
+            opening = now.replace( hour=int(rest["second_opening_hour"]), minute=0, second=0, microsecond=0 )
+            closing = now.replace( hour=int(rest["second_closing_hour"]), minute=0, second=0, microsecond=0 )
 
             if opening <= booking <= closing:
                 return (True,rest)
@@ -354,7 +354,7 @@ def put_fake_data():
     add_booking(4, 3, 1, (datetime.datetime.now().replace(hour=13) + datetime.timedelta(days=1)), 4)
     
     # 3: OLD BOOKING (USER 2, REST 2, TABLE 2)
-    add_booking(2, 2, 3, (datetime.datetime.now().replace(hour=13)), 2)
+    add_booking(2, 2, 3, (datetime.datetime.now().replace(hour=13) - datetime.timedelta(days=3)), 2)
     
     # 4: OLD BOOKING (USER 2, REST 2, TABLE 2)
     add_booking(2, 2, 3, (datetime.datetime.now().replace(hour=13) - datetime.timedelta(days=1)), 2)
