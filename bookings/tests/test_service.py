@@ -377,7 +377,7 @@ class BookingsTests(unittest.TestCase):
         for e in json:
             self.assertIn(e["id"], [3,4,6,7,8], msg=json) # a "safety" check
 
-        tomorrow = (datetime.datetime.now() + datetime.timedelta(days=1)).isoformat()
+        tomorrow = (datetime.datetime.now() + datetime.timedelta(days=2)).isoformat()
         response = client.get('/bookings?begin='+now+'&end='+tomorrow) 
         json = response.get_json() 
         self.assertEqual(response.status_code, 200, msg="Datetimes: "+now+", "+tomorrow+"\n"+response.get_data(as_text=True)) 
@@ -408,7 +408,7 @@ class BookingsTests(unittest.TestCase):
         self.assertEqual(json["id"], 2, msg=json) # a "safety" check
         self.assertIsNotNone(json["entrance_datetime"], msg=json) # another "safety" check
 
-        tomorrow = (datetime.datetime.now() + datetime.timedelta(days=1)).isoformat()
+        tomorrow = (datetime.datetime.now() + datetime.timedelta(days=2)).isoformat()
         response = client.get('/bookings?begin_entrance='+now+'&end_entrance='+tomorrow) 
         json = response.get_json() 
         self.assertEqual(response.status_code, 200, msg="Datetimes: "+now+", "+tomorrow+"\n"+response.get_data(as_text=True)) 
