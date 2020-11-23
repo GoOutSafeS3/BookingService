@@ -377,13 +377,6 @@ class BookingsTests(unittest.TestCase):
         for e in json:
             self.assertIn(e["id"], [3,4,6,7,8], msg=json) # a "safety" check
 
-        tomorrow = (datetime.datetime.now() + datetime.timedelta(days=2)).isoformat()
-        response = client.get('/bookings?begin='+now+'&end='+tomorrow) 
-        json = response.get_json() 
-        self.assertEqual(response.status_code, 200, msg="Datetimes: "+now+", "+tomorrow+"\n"+response.get_data(as_text=True)) 
-        self.assertEqual(len(json), 1, msg=json) 
-        self.assertEqual(json[0]["id"], 2, msg=json) # right request
-
     def test_bookings_filter_by_entrance_date(self): 
         """ Tests get the list of all bookings that match the filters (only filters that work with entrance datetimes)"""
         client = self.app.test_client() 
