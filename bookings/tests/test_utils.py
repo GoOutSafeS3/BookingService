@@ -142,12 +142,13 @@ class BookingsUtilsTests(unittest.TestCase):
 
             booking = now.replace( year=2020, month=11, day=16, hour=23, minute=0, second=0, microsecond=0 )
             
-            for i in [1,2,4]: # These closed
+            for i in [1,2]: # These closed
                 r,_ = restaurant_is_open(i, booking)
                 self.assertEqual(r, False, msg=i)
 
-            r,_ = restaurant_is_open(3, booking) # This open
-            self.assertEqual(r, True)
+            for i in [3,4]: # These closed
+                r,_ = restaurant_is_open(i, booking)
+                self.assertEqual(r, True, msg=i)
 
 
     def test_restaurant_is_open_failure(self):
@@ -181,7 +182,7 @@ class BookingsUtilsTests(unittest.TestCase):
 
             booking = now.replace( year=2020, month=11, day=16, hour=23, minute=0, second=0, microsecond=0 )
             
-            for i in [1,2,4]:
+            for i in [1,2]:
                 r = get_a_table(i, 1, booking)
                 self.assertEqual(r, -2, msg=i) # -2 in case that the restaurant is closed
 

@@ -80,7 +80,7 @@ restaurants = [
         "occupation_time": 2,
         "cuisine_type": "cuisine_type",
         "menu": "menu",
-        "closed_days": [1, 7]
+        "closed_days": []
     }
 ]
 
