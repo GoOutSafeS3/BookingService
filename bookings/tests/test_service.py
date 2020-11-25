@@ -383,8 +383,6 @@ class BookingsTests(unittest.TestCase):
 
         now = datetime.datetime.now().isoformat()
 
-        """ There are no bookings with entrance in this moment """
-
         response = client.get('/bookings?begin_entrance='+now) 
         json = response.get_json() 
         self.assertEqual(response.status_code, 200, msg="Datetime: "+now+"\n"+response.get_data(as_text=True)) 
@@ -393,7 +391,7 @@ class BookingsTests(unittest.TestCase):
         response = client.get('/bookings?end_entrance='+now) 
         json = response.get_json() 
         self.assertEqual(response.status_code, 200, msg="Datetime: "+now+"\n"+response.get_data(as_text=True)) 
-        self.assertEqual(len(json), 0, msg=json) # right request but no entrance so zero
+        self.assertEqual(len(json), 2, msg=json) # right request but no entrance so zero
 
         response = client.put('/bookings/2?entrance=true',json={})  # set the entrance 
         json = response.get_json() 
@@ -425,9 +423,9 @@ class BookingsTests(unittest.TestCase):
         response = client.get('/bookings?end_entrance='+tomorrow) 
         json = response.get_json() 
         self.assertEqual(response.status_code, 200, msg="Datetime: "+now+"\n"+response.get_data(as_text=True)) 
-        self.assertEqual(len(json), 2, msg=json) # right 
+        self.assertEqual(len(json), 4, msg=json) # right 
         for e in json:
-            self.assertIn(e["id"], [1,2], msg=json) # a "safety" check
+            self.assertIn(e["id"], [1,2,7,8], msg=json) # a "safety" check
 
 
     def test_bookings_filter_wrong_date(self): 
