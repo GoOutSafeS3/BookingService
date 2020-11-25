@@ -365,8 +365,9 @@ def put_fake_data():
     # 6: OLD BOOKING (USER 3, REST 3, TABLE 4)
     add_booking(3, 3, 1, (datetime.datetime.now().replace(hour=13) - datetime.timedelta(days=2)), 4)
 
-    # 7: OLD BOOKING (USER 2, REST 3, TABLE 5)
-    add_booking(4, 3, 2, (datetime.datetime.now().replace(hour=13) - datetime.timedelta(days=10)), 5)
-    
+    time = datetime.datetime.now().replace(hour=13) - datetime.timedelta(days=10)
+    # 7: OLD BOOKING (USER 4, REST 3, TABLE 5)
+    add_booking(4, 3, 2, (time), 5, entrance_datetime=(time + datetime.timedelta(minutes=1)))
+     
     # 8: OLD BOOKING (USER 3, REST 3, TABLE 4)
-    add_booking(3, 3, 1, (datetime.datetime.now().replace(hour=13) - datetime.timedelta(days=10)), 4)
+    add_booking(3, 3, 1, (time), 4, entrance_datetime=(time + datetime.timedelta(minutes=1)))
